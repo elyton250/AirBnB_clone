@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 from datetime import datetime
-import json
 import uuid
 """Defines the BaseModel class."""
 
@@ -10,18 +9,19 @@ class BaseModel:
 
     def __init__(self, *args, **kwargs):
         """initializes a base model
-            Args:
-                *args: unused
-                **kwargs: Key/value pairs of attributes.
+        Args:
+        *args: unused
+        **kwargs: Key/value pairs of attributes.
         """
         self.id = str(uuid.uuid4())
         self.created_at = datetime.now()
         self.updated_at = datetime.now()
         if kwargs:
-            self.from_dict(**kwargs)
-        else:
-            self.id = str(uuid.uuid4())
-            self.created_at = datetime.now()
+            for key, value in kwargs.items():
+                if key.endswith('at') and isinstance(value, str):
+                    self.__dict__[key] = datetime.strptime(value, "%Y-%m-%dT%H:%M:%S.%f")
+                else:
+                    self.__dict__[key] = value
 
     def save(self):
         """updates update_at attribute with current time"""
@@ -37,18 +37,5 @@ class BaseModel:
         return i_dict
 
     def __str__(self):
-        return f"[{self.__class__.__name__}] ({self.id}) {self.__dict__}"
-
-    @classmethod
-    def from_dict(self, *args, **kwargs):
-        """instance = cls()"""
-        for key, value in kwargs.items():
-            if key == '__class__':
-                continue
-            if key.endswith('at') and isinstance(value, str):
-                setattr(self, key, datetime.strptime(value, "%Y-%m-%dT%H:%M:%S.%f"))
-            else:
-                setattr(self, key, value)
-
-    def __str__(self):
+        """prints Base_model instances"""
         return f"[{self.__class__.__name__}] ({self.id}) {self.__dict__}"
