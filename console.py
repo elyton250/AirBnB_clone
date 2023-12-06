@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 """contains the entry point of the command interpreter"""
 import cmd
-from models import storage
+from models.engine.file_storage import FileStorage
 from models.base_model import BaseModel
 
 
@@ -38,9 +38,33 @@ class HBNBCommand(cmd.Cmd):
                 new_instance = globals()[cls_name]()
                 new_instance.save()
                 print(new_instance.id)
-            except NameError:
+            except KeyError:
                 print("** class doesn't exist **")
 
+    def do_show(self, arg):
+        """Prints the string representation of an instance."""
+        arguments = arg.split()
+
+        if not arguments:
+            print("** class name missing **")
+
+        else:
+            cls_name = arguments[0]
+
+            if cls_name not in globals():
+                print("** class doesn't exist **")
+
+            if len(arguments) < 2:
+                print("** instance id missing **")
+
+            else:
+                instance_id = arguments[1]
+                key = "{}.{}".format(cls_name, instance_id)
+                all_objects = FileStorage().all()
+                if key in all_objects:
+                    print(all_objects[key])
+                else:
+                    print("** no instance found **")
 
 if __name__ == '__main__':
     HBNBCommand().cmdloop()
