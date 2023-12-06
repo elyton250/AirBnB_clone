@@ -26,11 +26,12 @@ class BaseModel:
         return dt.isoformat()
     @classmethod
     def from_dict(cls, kwargs):
-        """instance = cls()"""
+        instance = cls()
         for key, value in kwargs.items():
             if key == '__class__':
                 continue
             if key.endswith('at') and isinstance(value, str):
-                setattr(self, key, datetime.datetime.fromisoformat(value))
+                setattr(instance, key, datetime.datetime.strptime(value, "%Y-%m-%dT%H:%M:%S.%f"))
             else:
-                setattr(self, key, value)
+                setattr(instance, key, value)
+        return instance

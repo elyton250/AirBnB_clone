@@ -19,10 +19,9 @@ print("--")
 my_new_model = BaseModel(**my_model_json)
 print(my_new_model.id)
 print(my_new_model)
-print(my_new_model.my_number)
-"""print("------below here--- there is an issue")
+print("------below here--- there is an issue")
 print("-------------------------")
 print(type(my_new_model.created_at))
 
 print("--")
-print(my_model is my_new_model)"""
+print(my_model is my_new_model)
