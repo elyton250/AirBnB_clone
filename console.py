@@ -1,8 +1,10 @@
 #!/usr/bin/python3
 """contains the entry point of the command interpreter"""
 import cmd
-from models import storage
+from models.engine.file_storage import FileStorage
 from models.base_model import BaseModel
+from models.user import User
+from models.__init__ import storage
 
 
 class HBNBCommand(cmd.Cmd):
@@ -38,41 +40,74 @@ class HBNBCommand(cmd.Cmd):
                 new_instance = globals()[cls_name]()
                 new_instance.save()
                 print(new_instance.id)
-            except NameError:
+            except KeyError:
                 print("** class doesn't exist **")
-    
+
+    def do_show(self, arg):
+        """Prints the string representation of an instance."""
+        arguments = arg.split()
+
+        if not arguments:
+            print("** class name missing **")
+
+        else:
+            cls_name = arguments[0]
+
+            if cls_name not in globals():
+                print("** class doesn't exist **")
+
+            if len(arguments) < 2:
+                print("** instance id missing **")
+
+            else:
+                instance_id = arguments[1]
+                key = "{}.{}".format(cls_name, instance_id)
+                all_objects = FileStorage().all()
+                if key in all_objects:
+                    print(all_objects[key])
+                else:
+                    print("** no instance found **")
     def do_destroy(self, arg):
-        """this method destroys an instance"""
-    if not arg:
-        print("** class name missing **")
-        return
-
-    args = arg.split()
-    if len(args) < 2:
-        print("** instance id missing **")
-        return
-
-    cls_name = args[0]
-    i_id = args[1]
-
-    all_instances = storage.all()
-
-    for key, value in all_instances.item():
-        if instance.id == i_id and instance.__class__.__name__ == cls_name:
-            del all_instance[key]
-            """print(f"Instance with ID {i_id} in class {cls_name} deleted.")"""
+        """this method destroys the instances"""
+        if not arg:
+            print("** class name missing **")
+            return
+        
+        args = arg.split()
+        
+        if len(args) < 2:
+            print("** instance id missing **")
+            return
+        
+        cls_name = args[0]
+        idd = args[1]
+        
+        instances = storage.all()
+        
+        print("this what is inside the storage")
+        print(instances)
+                
+        key_to_del = "{}.{}".format(cls_name, idd)
+        
+        if cls_name not in BaseModel.__subclasses__(): #there is  a bug here remember it
+            print("** class doesn't exist **")
+            return
+        
+        if key_to_del not in instances:
+            print("** no instance found **")
+            return
+        else:
+            del instances[key_to_del]
             storage.save()
+            print("user destroyed and saved")
             return
 
-    if not any(instance.__class__.__name__ == cls_name for instance in BaseModel.instances):
-        print("** class doesn't exist **")
-        return
 
-    print("** no instance found **")
-    storage.save()
 
-    def do_all(self
-        
- 
+
+
+
+
+
 if __name__ == '__main__':
     HBNBCommand().cmdloop()
