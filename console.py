@@ -1,16 +1,22 @@
 #!/usr/bin/python3
 """contains the entry point of the command interpreter"""
 import cmd
+from shlex import split
 from models.engine.file_storage import FileStorage
 from models.base_model import BaseModel
 from models.user import User
 from models.__init__ import storage
+from models.state import State
+from models.city import City
+from models.place import Place
+from models.amenity import Amenity
+from models.review import Review
 
 
 class HBNBCommand(cmd.Cmd):
     """Represents command interpreter"""
     prompt = "(hbnb) "
-    
+
     def do_quit(self, arg):
         """Exits the program"""
         return (True)
@@ -19,20 +25,21 @@ class HBNBCommand(cmd.Cmd):
         """Exit the program (Ctrl-D)"""
         print()
         return (True)
+
     def do_help(self, arg):
 
-        """Documented commands (type help <topic>):
-        ========================================"""
+        """(type help <topic>):
+        ========================"""
         super().do_help(arg)
-        
 
     def emptyline(self):
         """does nothing on enter"""
         pass
 
     def do_create(self, arg):
-        """ create commad to Creates 
-        a new instance of a class and prints its id"""
+        """Create a new class instance and print its id
+        Usage: create <class>
+        """
         if not arg:
             print("** class name missing **")
         else:
@@ -45,7 +52,9 @@ class HBNBCommand(cmd.Cmd):
                 print("** class doesn't exist **")
 
     def do_show(self, arg):
-        """Prints the string representation of an instance."""
+        """Prints the string representation of an instance.
+        Usage: show <class> <id> or <class>
+        """
         arguments = arg.split()
 
         if not arguments:
@@ -68,8 +77,11 @@ class HBNBCommand(cmd.Cmd):
                     print(all_objects[key])
                 else:
                     print("** no instance found **")
+
     def do_destroy(self, arg):
-        """this method destroys the instances"""
+        """Deletes a class instance by its id
+        Usage: destroy <class> <id>
+        """
         args = arg.split()
         if not args:
             print("** class name missing **")
@@ -89,77 +101,85 @@ class HBNBCommand(cmd.Cmd):
                 del all_objects[key_to_del]
                 storage.save()
 
-    def do_all(self, args):
+    def do_all(self, arg):
         """this prints a string represantation of an instance"""
-        
-        instances = storage.all()
-        
-        if args:
-            for key, value in instances.items():
-                if args == key.split('.')[0]:
-                    print(str(instances[key]))
+        argl = split(arg)
+        if len(argl) > 0 and argl[0] not in globals():
+            print("** class doesn't exist **")
         else:
-            print(str(instances))
-
+            objl = []
+            for obj in storage.all().values():
+                if len(argl) > 0 and argl[0] == obj.__class__.__name__:
+                    objl.append(obj.__str__())
+                elif len(argl) == 0:
+                    objl.append(obj.__str__())
+            print(objl)
 
     def do_update(self, arg):
-        
-        if not arg:
+        """Updates an instance based on the class name and id
+        Usage: update <class name> <id>
+        <attribute name> "<attribute value>" """
+        args = arg.split()
+
+        if not args:
             print("** class name missing **")
             return
 
-        args = arg.split()
-        
         cls_name = args[0]
-        idd = args[1]
-        attr_name = args[2]
-        attr_val = args[3]
+        if cls_name not in globals():
+            print("** class doesn't exist **")
+            return
 
         if len(args) < 2:
             print("** instance id missing **")
             return
 
-        instances = storage.all()
-        
-        cls_name_list = [key.split('.')[0] for key in instances.keys()]
-        
-        if cls_name not in cls_name_list:
-            print("** class doesn't exist **")
-            return
+        instance_id = args[1]
+        key = "{}.{}".format(cls_name, instance_id)
+        all_objects = FileStorage().all()
 
-        key_to_up = "{}.{}".format(cls_name, idd)
-        
-        keys_list = list(instances.keys())
-            
-        if key_to_up not in keys_list:
+        if key not in all_objects:
             print("** no instance found **")
             return
-        else:
-            if len(args) < 3:
-                print("** attribute name missing **")
-                return
-            elif len(args) < 4:
-                print("** value missing **")
-                return
-            else:
-                attr_value = self.cast_type(attr_val)
-                setattr(instances[key_to_up], attr_name, attr_value)
-                storage.save()
-                return
-    @staticmethod 
+
+        if len(args) < 3:
+            print("** attribute name missing **")
+            return
+
+        attr_name = args[2]
+
+        if len(args) < 4:
+            print("** value missing **")
+            return
+
+        attr_value = args[3]
+        attr_value = self.cast_type(attr_value)
+
+        if attr_name not in ["id", "created_at", "updated_at"]:
+            setattr(all_objects[key], attr_name, attr_value)
+            FileStorage().save()
+
+    @staticmethod
     def cast_type(attr_value):
-        """Convert attr_value to the appropriate type by trying multiple types"""
+        """Convert attr_value to the
+        appropriate type by trying multiple types"""
+        try:
+            for data_type in [int, float, HBNBCommand.cast_bool]:
+                attr_value = data_type(attr_value)
+                return (attr_value)
+        except (ValueError, TypeError):
+            return (attr_value)
 
-        possible_types = [int, float, bool, str]
+    @staticmethod
+    def cast_bool(value):
+        """Converts a string to boolean."""
+        if value.lower() in ['true', '1']:
+            return (True)
+        elif value.lower() in ['false', '0']:
+            return (False)
+        else:
+            raise ValueError("Invalid boolean value")
 
-        for data_type in possible_types:
-            try:
-                converted_value = data_type(attr_value)
-                return converted_value
-            except (ValueError, TypeError):
-                pass
-        #there is a bug everything is being casted as bool
-        return attr_value
 
 if __name__ == '__main__':
     HBNBCommand().cmdloop()
