@@ -2,6 +2,7 @@
 """Defines a user class"""
 from models.base_model import BaseModel
 
+
 class User(BaseModel):
     """Represents a user class
     Args:
@@ -14,4 +15,3 @@ class User(BaseModel):
     password = ""
     first_name = ""
     last_name = ""
-
