@@ -26,12 +26,6 @@ class HBNBCommand(cmd.Cmd):
         print()
         return (True)
 
-    def do_help(self, arg):
-
-        """(type help <topic>):
-        ========================"""
-        super().do_help(arg)
-
     def emptyline(self):
         """does nothing on enter"""
         pass
