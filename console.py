@@ -119,66 +119,49 @@ class HBNBCommand(cmd.Cmd):
         """Updates an instance based on the class name and id
         Usage: update <class name> <id>
         <attribute name> "<attribute value>" """
-        args = arg.split()
 
-        if not args:
+        argl = split(arg)
+        objdict = storage.all()
+
+        if len(argl) == 0:
             print("** class name missing **")
-            return
-
-        cls_name = args[0]
-        if cls_name not in globals():
-            print("** class doesn't exist **")
-            return
-
-        if len(args) < 2:
-            print("** instance id missing **")
-            return
-
-        instance_id = args[1]
-        key = "{}.{}".format(cls_name, instance_id)
-        all_objects = FileStorage().all()
-
-        if key not in all_objects:
-            print("** no instance found **")
-            return
-
-        if len(args) < 3:
-            print("** attribute name missing **")
-            return
-
-        attr_name = args[2]
-
-        if len(args) < 4:
-            print("** value missing **")
-            return
-
-        attr_value = args[3]
-        attr_value = self.cast_type(attr_value)
-
-        if attr_name not in ["id", "created_at", "updated_at"]:
-            setattr(all_objects[key], attr_name, attr_value)
-            FileStorage().save()
-
-    @staticmethod
-    def cast_type(attr_value):
-        """Convert attr_value to the
-        appropriate type by trying multiple types"""
-        try:
-            for data_type in [int, float, HBNBCommand.cast_bool]:
-                attr_value = data_type(attr_value)
-                return (attr_value)
-        except (ValueError, TypeError):
-            return (attr_value)
-
-    @staticmethod
-    def cast_bool(value):
-        """Converts a string to boolean."""
-        if value.lower() in ['true', '1']:
-            return (True)
-        elif value.lower() in ['false', '0']:
             return (False)
-        else:
-            raise ValueError("Invalid boolean value")
+        if argl[0] not in globals():
+            print("** class doesn't exist **")
+            return (False)
+        if len(argl) == 1:
+            print("** instance id missing **")
+            return False
+        if "{}.{}".format(argl[0], argl[1]) not in objdict.keys():
+            print("** no instance found **")
+            return (False)
+        if len(argl) == 2:
+            print("** attribute name missing **")
+            return (False)
+        if len(argl) == 3:
+            try:
+                type(eval(argl[2])) != dict
+            except NameError:
+                print("** value missing **")
+                return (False)
+
+        if len(argl) == 4:
+            obj = objdict["{}.{}".format(argl[0], argl[1])]
+            if argl[2] in obj.__class__.__dict__.keys():
+                valtype = type(obj.__class__.__dict__[argl[2]])
+                obj.__dict__[argl[2]] = valtype(argl[3])
+            else:
+                obj.__dict__[argl[2]] = argl[3]
+        elif type(eval(argl[2])) == dict:
+            obj = objdict["{}.{}".format(argl[0], argl[1])]
+            for k, v in eval(argl[2]).items():
+                if (k in obj.__class__.__dict__.keys() and
+                        type(obj.__class__.__dict__[k]) in {str, int, float}):
+                    valtype = type(obj.__class__.__dict__[k])
+                    obj.__dict__[k] = valtype(v)
+                else:
+                    obj.__dict__[k] = v
+        storage.save()
 
 
 if __name__ == '__main__':
