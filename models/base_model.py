@@ -11,8 +11,8 @@ class BaseModel:
     def __init__(self, *args, **kwargs):
         """initializes a base model
         Args:
-        *args: unused
-        **kwargs: Key/value pairs of attributes.
+            *args: unused
+            **kwargs: Key/value pairs of attributes.
         """
         self.id = str(uuid.uuid4())
         self.created_at = datetime.now()
