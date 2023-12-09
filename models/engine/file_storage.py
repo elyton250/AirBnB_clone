@@ -42,7 +42,7 @@ class FileStorage:
                 objdict = json.load(f)
                 for objects in objdict.values():
                     cls_name = objects["__class__"]
-                    del o["__class__"]
+                    del objects["__class__"]
                     self.new(eval(cls_name)(**objects))
         except FileNotFoundError:
             return
