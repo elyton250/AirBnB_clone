@@ -20,7 +20,7 @@ class FileStorage:
     __objects = {}
 
     def all(self):
-        """Return the dictionary __objects."""
+        """Returns the dictionary __objects."""
         return (FileStorage.__objects)
 
     def new(self, obj):
@@ -46,4 +46,3 @@ class FileStorage:
                     self.new(eval(cls_name)(**objects))
         except FileNotFoundError:
             return
-
