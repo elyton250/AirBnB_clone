@@ -15,6 +15,9 @@ from models.review import Review
 
 
 def parse(arg):
+    """parses an argument
+    arg: argument to be parsed
+    """
     curly_braces = re.search(r"\{(.*?)\}", arg)
     brackets = re.search(r"\[(.*?)\]", arg)
     if curly_braces is None:
@@ -53,7 +56,9 @@ class HBNBCommand(cmd.Cmd):
         pass
 
     def default(self, arg):
-        """Default behavior for cmd module when input is invalid"""
+        """Default behavior for cmd module when input is invalid
+        arg: argument
+        """
         argdict = {
             "all": self.do_all,
             "show": self.do_show,
@@ -76,6 +81,7 @@ class HBNBCommand(cmd.Cmd):
     def do_create(self, arg):
         """Create a new class instance and print its id
         Usage: create <class>
+        arg: argument
         """
         if not arg:
             print("** class name missing **")
@@ -91,6 +97,7 @@ class HBNBCommand(cmd.Cmd):
     def do_show(self, arg):
         """Usage: show <class> <id> or <class>.show(<id>)
         Display the string representation of a class instance of a given id.
+        arg: argument
         """
         argl = split(arg)
         objdict = storage.all()
@@ -108,6 +115,7 @@ class HBNBCommand(cmd.Cmd):
     def do_destroy(self, arg):
         """Deletes a class instance by its id
         Usage: destroy <class> <id>
+        arg: argument
         """
         args = arg.parse()
         if not args:
@@ -129,7 +137,10 @@ class HBNBCommand(cmd.Cmd):
                 storage.save()
 
     def do_all(self, arg):
-        """this prints a string represantation of an instance"""
+        """this prints a string represantation of an instance
+        Usage: all or all <class> or <class>.all()
+        arg: argument
+        """
         argl = split(arg)
         if len(argl) > 0 and argl[0] not in globals():
             print("** class doesn't exist **")
@@ -145,7 +156,9 @@ class HBNBCommand(cmd.Cmd):
     def do_update(self, arg):
         """Updates an instance based on the class name and id
         Usage: update <class name> <id>
-        <attribute name> "<attribute value>" """
+        <attribute name> "<attribute value>"
+        arg: argument
+        """
 
         argl = parse(arg)
         objdict = storage.all()
@@ -192,7 +205,9 @@ class HBNBCommand(cmd.Cmd):
 
     def do_count(self, arg):
         """Usage: count <class> or <class>.count()
-        Retrieve the number of instances of a given class."""
+        Retrieve the number of instances of a given class.
+        arg: argument
+        """
         argl = split(arg)
         count = 0
         for obj in storage.all().values():
