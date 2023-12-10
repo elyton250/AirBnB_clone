@@ -14,6 +14,24 @@ from models.amenity import Amenity
 from models.review import Review
 
 
+def parse(arg):
+    curly_braces = re.search(r"\{(.*?)\}", arg)
+    brackets = re.search(r"\[(.*?)\]", arg)
+    if curly_braces is None:
+        if brackets is None:
+            return [i.strip(",") for i in split(arg)]
+        else:
+            lexer = split(arg[:brackets.span()[0]])
+            retl = [i.strip(",") for i in lexer]
+            retl.append(brackets.group())
+            return retl
+    else:
+        lexer = split(arg[:curly_braces.span()[0]])
+        retl = [i.strip(",") for i in lexer]
+        retl.append(curly_braces.group())
+        return retl
+
+
 class HBNBCommand(cmd.Cmd):
     """Represents command interpreter"""
     prompt = "(hbnb) "
@@ -37,8 +55,8 @@ class HBNBCommand(cmd.Cmd):
             "all": self.do_all,
             "show": self.do_show,
             "destroy": self.do_destroy,
-            "count": self.do_count,
-            "update": self.do_update
+            "update":self.do_update,
+            "count": self.do_count
         }
         match = re.search(r"\.", arg)
         if match is not None:
@@ -88,7 +106,7 @@ class HBNBCommand(cmd.Cmd):
         """Deletes a class instance by its id
         Usage: destroy <class> <id>
         """
-        args = arg.split()
+        args = arg.parse()
         if not args:
             print("** class name missing **")
             return
@@ -126,7 +144,7 @@ class HBNBCommand(cmd.Cmd):
         Usage: update <class name> <id>
         <attribute name> "<attribute value>" """
 
-        argl = split(arg)
+        argl = parse(arg)
         objdict = storage.all()
 
         if len(argl) == 0:
