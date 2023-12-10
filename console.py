@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 """contains the entry point of the command interpreter"""
 import cmd
+import re
 from shlex import split
 from models.engine.file_storage import FileStorage
 from models.base_model import BaseModel
@@ -30,6 +31,27 @@ class HBNBCommand(cmd.Cmd):
         """does nothing on enter"""
         pass
 
+    def default(self, arg):
+        """Default behavior for cmd module when input is invalid"""
+        argdict = {
+            "all": self.do_all,
+            "show": self.do_show,
+            "destroy": self.do_destroy,
+            "count": self.do_count,
+            "update": self.do_update
+        }
+        match = re.search(r"\.", arg)
+        if match is not None:
+            argl = [arg[:match.span()[0]], arg[match.span()[1]:]]
+            match = re.search(r"\((.*?)\)", argl[1])
+            if match is not None:
+                command = [argl[1][:match.span()[0]], match.group()[1:-1]]
+                if command[0] in argdict.keys():
+                    call = "{} {}".format(argl[0], command[1])
+                    return argdict[command[0]](call)
+        print("*** Unknown syntax: {}".format(arg))
+        return False
+
     def do_create(self, arg):
         """Create a new class instance and print its id
         Usage: create <class>
@@ -46,31 +68,21 @@ class HBNBCommand(cmd.Cmd):
                 print("** class doesn't exist **")
 
     def do_show(self, arg):
-        """Prints the string representation of an instance.
-        Usage: show <class> <id> or <class>
+        """Usage: show <class> <id> or <class>.show(<id>)
+        Display the string representation of a class instance of a given id.
         """
-        arguments = arg.split()
-
-        if not arguments:
+        argl = split(arg)
+        objdict = storage.all()
+        if len(argl) == 0:
             print("** class name missing **")
-
+        elif argl[0] not in globals():
+            print("** class doesn't exist **")
+        elif len(argl) == 1:
+            print("** instance id missing **")
+        elif "{}.{}".format(argl[0], argl[1]) not in objdict:
+            print("** no instance found **")
         else:
-            cls_name = arguments[0]
-
-            if cls_name not in globals():
-                print("** class doesn't exist **")
-
-            elif len(arguments) < 2:
-                print("** instance id missing **")
-
-            else:
-                instance_id = arguments[1]
-                key = "{}.{}".format(cls_name, instance_id)
-                all_objects = FileStorage().all()
-                if key in all_objects:
-                    print(all_objects[key])
-                else:
-                    print("** no instance found **")
+            print(objdict["{}.{}".format(argl[0], argl[1])])
 
     def do_destroy(self, arg):
         """Deletes a class instance by its id
@@ -156,6 +168,16 @@ class HBNBCommand(cmd.Cmd):
                 else:
                     obj.__dict__[k] = v
         storage.save()
+
+    def do_count(self, arg):
+        """Usage: count <class> or <class>.count()
+        Retrieve the number of instances of a given class."""
+        argl = split(arg)
+        count = 0
+        for obj in storage.all().values():
+            if argl[0] == obj.__class__.__name__:
+                count += 1
+        print(count)
 
 
 if __name__ == '__main__':
