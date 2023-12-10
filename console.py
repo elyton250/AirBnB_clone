@@ -33,7 +33,10 @@ def parse(arg):
 
 
 class HBNBCommand(cmd.Cmd):
-    """Represents command interpreter"""
+    """Represents command interpreter
+    Attributes:
+             prompt (str): The command prompt.
+    """
     prompt = "(hbnb) "
 
     def do_quit(self, arg):
