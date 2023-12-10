@@ -55,7 +55,7 @@ class HBNBCommand(cmd.Cmd):
             "all": self.do_all,
             "show": self.do_show,
             "destroy": self.do_destroy,
-            "update":self.do_update,
+            "update": self.do_update,
             "count": self.do_count
         }
         match = re.search(r"\.", arg)
