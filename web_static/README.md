@@ -1,1 +1,1 @@
-web_static
+this is the web static airbnb project
